@@ -33,7 +33,7 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'mysql',
   host: 'localhost',
-  port: 5432,
+  port: 3306,
   username: 'root',
   password: 'ifedayo',
   database: 'cmsdb',

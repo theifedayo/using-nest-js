@@ -11,6 +11,9 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './modules/auth/jwt.strategy';
 import { AppMiddleware } from './app.middleware';
 import { typeOrmConfig } from './config/typeorm.config';
+import { AppService } from './app.service';
+import { AuthService } from './modules/auth/auth.service';
+import { UserService } from './modules/user/user.service';
 
 
 @Module({
@@ -26,6 +29,6 @@ import { typeOrmConfig } from './config/typeorm.config';
     }),
   ],
   controllers: [AppController, AuthController, UserController],
-  providers: [JwtStrategy, AppMiddleware],
+  providers: [AppService, JwtStrategy, AppMiddleware, AuthService, UserService],
 })
 export class AppModule {}
