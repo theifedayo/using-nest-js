@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from './entities/post.entity';
-import { Category } from './entities/category.entity';
+import { PostEntity } from './entities/post.entity';
+import { CategoryEntity } from './entities/category.entity';
 
 @Injectable()
 export class PostService {
   constructor(
-    @InjectRepository(Post)
+    @InjectRepository(PostEntity)
     private readonly postRepository: Repository<Post>,
   ) {}
 
-  async findAll(): Promise<Post[]> {
+  async findAll(): Promise<PostEntity[]> {
     return await this.postRepository.find();
   }
 
-  async create(post: Post): Promise<Post> {
+  async create(post: PostEntity): Promise<PostEntity> {
     return await this.postRepository.save(post);
   }
 
-  async update(id: number, post: Post): Promise<void> {
+  async update(id: number, post: PostEntity): Promise<void> {
     await this.postRepository.update(id, post);
   }
 
@@ -31,8 +31,8 @@ export class PostService {
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepository: Repository<CategoryEntity>,
   ) {}
 
   async findAll(): Promise<Category[]> {

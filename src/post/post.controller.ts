@@ -17,7 +17,7 @@ export class PostsController {
     private readonly categoryRepository: Repository<CategoryEntity>,
     private readonly userService: UsersService,
   ) {}
-
+  
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
@@ -52,8 +52,8 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() post: PostEntity, @Body('userId') userId: string) {
-    const originalPost = await this.postRepository.findOne({ id }, {
+  async update(@Param('id') id: number, @Body() post: PostEntity, @Body('userId') userId: number) {
+    const originalPost = await this.postRepository.findOne({id} , {
       relations: ['user'],
     });
 
@@ -69,7 +69,7 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Body('userId') userId: string) {
+  async remove(@Param('id') id: number, @Body('userId') userId: number) {
     const post = await this.postRepository.findOne({ id }, {
       relations: ['user'],
     });
@@ -80,8 +80,8 @@ export class PostsController {
       return await this.postRepository.remove(post);
     }
   }
-  
-  @Controller('api/categories')
+
+  @Controller('categories')
   export class CategoriesController {
     constructor(
       @InjectRepository(CategoryEntity)
@@ -96,8 +96,8 @@ export class PostsController {
   
     @UseGuards(JwtAuthGuard)
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-      return await this.categoryRepository.findOne({ id });
+    async findOne(@Param('id') id: number) {
+      return await this.categoryRepository.findOne({ where: {id: id} });
     }
   
     @UseGuards(JwtAuthGuard)
@@ -108,8 +108,8 @@ export class PostsController {
   
     @UseGuards(JwtAuthGuard)
     @Put(':id')
-    async update(@Param('id') id: string, @Body() category: CategoryEntity) {
-      const originalCategory = await this.categoryRepository.findOne({ id });
+    async update(@Param('id') id: number, @Body() category: CategoryEntity) {
+      let originalCategory = await this.categoryRepository.findOne({ where: {id}});
       originalCategory.name = category.name;
       return await this.categoryRepository.save(originalCategory);
     }
@@ -117,8 +117,10 @@ export class PostsController {
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async remove(@Param('id') id: string) {
-      return await this.categoryRepository.delete({ id });
+      return await this.categoryRepository.delete(id);
     }
   }
+
+
   
 
