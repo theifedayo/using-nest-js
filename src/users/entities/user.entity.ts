@@ -1,5 +1,7 @@
 import * as bcrypt from 'bcrypt';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { CategoryEntity } from 'src/post/entities/category.entity';
+import { PostEntity } from 'src/post/entities/post.entity';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { Role } from '../../auth/models/roles.model';
 import { DefaultEntity } from '../../utils/entities/default.entity';
 
@@ -31,6 +33,12 @@ export class User extends DefaultEntity {
     default: Role.CUSTOMER,
   })
   role: Role;
+
+  @OneToMany(type => PostEntity, post => post.user)
+  posts: PostEntity[];
+
+  @OneToMany(type => CategoryEntity, category => category.user)
+  categories: CategoryEntity[];
 
   @BeforeInsert()
   async hashPassword() {

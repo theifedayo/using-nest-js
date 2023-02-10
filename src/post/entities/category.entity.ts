@@ -1,15 +1,20 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
-import { Post } from './post.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
+import { PostEntity } from './post.entity';
 
 
-@Entity()
-export class Category {
+@Entity('categories')
+export class CategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
 
-  @OneToMany(type => Post, post => post.category)
-  posts: Post[];
+  @OneToMany(type => PostEntity, post => post.category)
+  posts: PostEntity[];
+
+  @ManyToOne(type => User, user => user.categories)
+  user: User;
+
 }

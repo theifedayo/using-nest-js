@@ -1,8 +1,9 @@
+import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Category } from './category.entity';
+import { CategoryEntity } from './category.entity';
 
-@Entity()
-export class Post {
+@Entity('posts')
+export class PostEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -12,7 +13,10 @@ export class Post {
   @Column()
   content: string;
 
-  @ManyToOne(type => Category, category => category.posts)
+  @ManyToOne(type => CategoryEntity, category => category.posts)
   @JoinColumn({ name: 'category_id' })
-  category: Category;
+  category: CategoryEntity;
+
+  @ManyToOne(type => User, user => user.posts)
+  user: User;
 }
