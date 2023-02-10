@@ -1,7 +1,10 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CategoryEntity } from 'src/post/entities/category.entity';
+import { PostEntity } from 'src/post/entities/post.entity';
+import { User } from 'src/users/entities/user.entity';
 import * as request from 'supertest';
-import { Connection } from 'typeorm';
+import { createConnection, Connection } from 'typeorm';
 import { AppModule } from './../src/app.module';
 import { userAdmin, userCustomer, userLogin } from './utils';
 
@@ -47,7 +50,7 @@ describe('AppController (e2e)', () => {
 
     it('authenticates user with valid credentials and provides a jwt token', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('api/v1/auth/login')
         .send({ email: userLogin.email, password: userLogin.password })
         .expect(200);
 
@@ -59,7 +62,7 @@ describe('AppController (e2e)', () => {
 
     it('fails to authenticate user with an incorrect password', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('api/v1/auth/login')
         .send({ email: userLogin.email, password: 'wrong' })
         .expect(401);
 
@@ -68,7 +71,7 @@ describe('AppController (e2e)', () => {
 
     it('fails to authenticate user that does not exist', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('api/v1/auth/login')
         .send({ email: 'nobody@example.com', password: 'test' })
         .expect(401);
 
@@ -80,7 +83,7 @@ describe('AppController (e2e)', () => {
     let customerId: number;
     it('should create a customer user', async () => {
       const response = await request(app.getHttpServer())
-        .post('/users')
+        .post('api/v1/users')
         .send({
           email: userCustomer.email,
           password: userCustomer.password,
@@ -97,7 +100,7 @@ describe('AppController (e2e)', () => {
 
     it('should not create a customer user with an invalid email', async () => {
       await request(app.getHttpServer())
-        .post('/users')
+        .post('api/v1/users')
         .send({
           email: 'invalid',
           password: userCustomer.password,
@@ -109,7 +112,7 @@ describe('AppController (e2e)', () => {
 
     it('should get a user', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/users/${customerId}`)
+        .get(`api/v1/users/${customerId}`)
         .set('Authorization', `Bearer ${adminJwtToken}`)
         .expect(200);
 
@@ -118,7 +121,7 @@ describe('AppController (e2e)', () => {
 
     it('should list all users', async () => {
       const response = await request(app.getHttpServer())
-        .get('/users')
+        .get('api/v1/users')
         .set('Authorization', `Bearer ${adminJwtToken}`)
         .expect(200);
 
@@ -127,7 +130,7 @@ describe('AppController (e2e)', () => {
 
     it('should update a customer user', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/users/${customerId}`)
+        .patch(`api/v1/users/${customerId}`)
         .set('Authorization', `Bearer ${adminJwtToken}`)
         .send({
           email: userCustomer.email,
@@ -144,19 +147,98 @@ describe('AppController (e2e)', () => {
 
     it('should delete a customer user', async () => {
       await request(app.getHttpServer())
-        .delete(`/users/${customerId}`)
+        .delete(`api/v1/users/${customerId}`)
         .set('Authorization', `Bearer ${adminJwtToken}`)
         .expect(200);
     });
 
     it('should not delete a customer user with an invalid id', async () => {
       await request(app.getHttpServer())
-        .delete('/users/0')
+        .delete('api/v1/users/0')
         .set('Authorization', `Bearer ${adminJwtToken}`)
         .expect(404);
     });
   });
 
-  describe('Posts', () => {})
-  describe('Categories', () => {})
+  describe('Categories and Posts API', () => {
+    let token: string;
+    let user: User;
+  
+    beforeEach(async () => {
+      // create a user
+      user = new User();
+      user.firstName = 'testuser';
+      user.email = 'testuser@example.com';
+      user.password = 'testpassword';
+  
+      // log in the user to get a JWT token
+      const response = await request(app)
+        .post('api/v1/auth/login')
+        .send({
+          email: user.email,
+          password: 'testpassword',
+        });
+      token = response.body.token;
+    });
+  
+    describe('GET api/v1/categories', () => {
+      it('should return a list of categories', async () => {
+        // create a category
+        const category = new CategoryEntity();
+        category.name = 'Test Category';
+        category.user = user;
+  
+        // send the GET /categories request
+        const response = await request(app)
+          .get('api/v1/categories')
+          .set('Authorization', `Bearer ${token}`);
+  
+        // check the response
+        expect(response.status).toBe(200);
+        expect(response.body.data).toHaveLength(1);
+        expect(response.body.data[0]).toEqual({
+          id: category.id,
+          name: category.name,
+        });
+      });
+    });
+  
+    describe('GET api/v1/posts', () => {
+      it('should return a list of posts', async () => {
+        // create a category
+        const category = new CategoryEntity();
+        category.name = 'Test Category';
+        category.user = user;
+  
+        // create a post
+        const post = new PostEntity();
+        post.title = 'Test Post';
+        post.content = 'Test post content';
+        post.user = user;
+        post.category = category;
+  
+        // send the GET /posts request
+        const response = await request(app)
+          .get('api/v1/posts')
+          .set('Authorization', `Bearer ${token}`);
+  
+        // check the response
+        expect(response.status).toBe(200);
+        expect(response.body.data).toHaveLength(1);
+        expect(response.body.data[0]).toEqual({
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          category: {
+            id: category.id,
+            name: category.name,
+          },
+          user: {
+            id: user.id,
+            email: user.email,
+          },
+        });
+      });
+    })
+  })
 });
