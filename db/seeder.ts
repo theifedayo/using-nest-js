@@ -2,19 +2,6 @@ import { Connection, EntitySubscriberInterface, EventSubscriber } from 'typeorm'
 import { User } from 'src/users/entities/user.entity';
 import { PostEntity } from 'src/post/entities/post.entity';
 import { CategoryEntity } from 'src/post/entities/category.entity';
-import * as bcrypt from 'bcrypt';
-
-
-function hashPassword(): Promise<string> {
-    const password = process.env.SEED_USER_PASSWORD;
-    return new Promise((resolve, reject) => {
-      const salt = bcrypt.genSaltSync(10);
-      bcrypt.hash(password, salt, (err, hash) => {
-        if (err) return reject(err);
-        resolve(hash);
-      });
-    });
-}
 
 @EventSubscriber()
 export class Seeder implements EntitySubscriberInterface {
@@ -28,32 +15,30 @@ export class Seeder implements EntitySubscriberInterface {
 
   async afterInsert(event) {
     const { entity } = event;
+    const { manager } = this.connection;
 
     if (entity instanceof User) {
-        [
-            {
-              id: 12,
-              email: "dex@gmail.com",
-              password: await hashPassword(),
-              first_name: "dexter",
-              last_name: "Mackey"
-            },
-            {
-              id: 12,
-              email: "will@gmail.com",
-              password: await hashPassword(),
-              first_name: "will",
-              last_name: "johnson"
-            }
-          ]
+      const user = new User();
+      user.username = 'testuser';
+      user.email = 'testuser@example.com';
+      user.password = 'testpassword';
+      await manager.save(user);
     }
 
     if (entity instanceof PostEntity) {
-      // populate post data
+      const post = new PostEntity();
+      post.title = 'Test Post';
+      post.content = 'Test post content';
+      post.user = await manager.findOne(User, { where: { username: 'testuser' } });
+      post.category = await manager.findOne(CategoryEntity, { where: { name: 'Test Category' } });
+      await manager.save(post);
     }
 
     if (entity instanceof CategoryEntity) {
-      // populate category data
+      const category = new CategoryEntity();
+      category.name = 'Test Category';
+      category.user = await manager.findOne(User, { where: { username: 'testuser' } });
+      await manager.save(category);
     }
   }
 }
