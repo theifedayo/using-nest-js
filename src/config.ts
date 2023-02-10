@@ -7,7 +7,7 @@ export default registerAs('config', () => {
     },
     postgres: {
       host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10) || 3306,
+      port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
       name: process.env.POSTGRES_NAME,
       password: process.env.POSTGRES_PASSWORD,
       user: process.env.POSTGRES_USER,

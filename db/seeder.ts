@@ -19,7 +19,8 @@ export class Seeder implements EntitySubscriberInterface {
 
     if (entity instanceof User) {
       const user = new User();
-      user.username = 'testuser';
+      user.firstName = 'testuser';
+      user.lastName = 'tst';
       user.email = 'testuser@example.com';
       user.password = 'testpassword';
       await manager.save(user);
