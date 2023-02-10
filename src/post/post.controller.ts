@@ -3,8 +3,6 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostEntity } from './entities/post.entity';
 import { CategoryEntity } from './entities/category.entity';
-import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
@@ -28,7 +26,7 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     return await this.postRepository.findOne({ id }, {
       relations: ['category', 'user'],
     });
@@ -38,10 +36,10 @@ export class PostsController {
   @Post()
   async create(
     @Body() post: PostEntity,
-    @Body('categoryId') categoryId: string,
-    @Body('userId') userId: string,
+    @Body('categoryId') categoryId: number,
+    @Body('userId') userId: number,
   ) {
-    const category = await this.categoryRepository.findOne({ id: categoryId });
+    const category = await this.categoryRepository.findOne({ where: {id: categoryId} });
     const user = await this.userService.findOne(userId);
 
     post.category = category;

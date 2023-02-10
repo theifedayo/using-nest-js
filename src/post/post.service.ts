@@ -8,11 +8,17 @@ import { CategoryEntity } from './entities/category.entity';
 export class PostService {
   constructor(
     @InjectRepository(PostEntity)
-    private readonly postRepository: Repository<Post>,
+    private readonly postRepository: Repository<PostEntity>,
   ) {}
 
   async findAll(): Promise<PostEntity[]> {
     return await this.postRepository.find();
+  }
+
+  async findOne(id: number): Promise<PostEntity> {
+    return this.postRepository.findOne({ id }, {
+      relations: ['category', 'user'],
+    });
   }
 
   async create(post: PostEntity): Promise<PostEntity> {
@@ -35,15 +41,15 @@ export class CategoryService {
     private readonly categoryRepository: Repository<CategoryEntity>,
   ) {}
 
-  async findAll(): Promise<Category[]> {
+  async findAll(): Promise<CategoryEntity[]> {
     return await this.categoryRepository.find();
   }
 
-  async create(category: Category): Promise<Category> {
+  async create(category: CategoryEntity): Promise<CategoryEntity> {
     return await this.categoryRepository.save(category);
   }
 
-  async update(id: number, category: Category): Promise<void> {
+  async update(id: number, category: CategoryEntity): Promise<void> {
     await this.categoryRepository.update(id, category);
   }
 
