@@ -5,6 +5,7 @@ import { DefaultEntity } from '../../utils/entities/default.entity';
 
 @Entity('users')
 export class User extends DefaultEntity {
+
   @Column({ unique: true })
   email: string;
 
